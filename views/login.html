@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device=width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="/css/normalice.css">
+    <link rel="stylesheet" href="/css/estilo.css">
+
+</head>
+
+<body>
+    <header class="hero">
+        <div class="container">
+            <nav class="nav">
+                <a href="/" class="nav__items">Inicio</a>
+                <a href="/register" class="nav__items nav__items--cta">Registrate</a>
+            </nav>
+            <section class="form__registro">
+                <form action="/login" method="post">
+                    <div class="form__container">
+                         <h3 class="form__ingresar">Iniciar Sesión</h3>
+                         <input class="controls" type="email" name="email" placeholder="Correo electrónico" id="email" required>
+                         <input class="controls" type="password" name="password" placeholder="Contraseña" id="password" required>
+                         <button href="/mi-cuenta" class="buttons" type="submit">Ingresar</button>
+                         <p1>¿Aun no tienes cuenta?<a class="form__contra" href="/register">Registrate</a></p1>
+                    </div>
+                </form>    
+            </section>
+        </div>
+    </header>
+</body>
+
+</html>

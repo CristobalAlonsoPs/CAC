@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Mi Cuenta</title>
+    <link rel="stylesheet" href="/css/normalice.css">
+    <link rel="stylesheet" href="/css/estilo.css">
+</head>
+<body>
+    <header class="hero">
+        <div class="container">
+            <nav class="nav">
+                <a href="/" class="nav__items">Inicio</a>
+                <a href="/logout" class="nav__items nav__items--cta">Cerrar Sesión</a>
+            </nav>
+            <section class="hero__container">
+                <div class="hero__text">
+                    <h1 class="hero__title">Bienvenido a tu cuenta</h1>
+                </div>
+            </section>
+        </div>
+    </header>
+
+    <main>
+        <h1 class="subtitle textCenter pad">Mi Cuenta</h1>
+        <section class="user-profile container1 miCuenta">
+            <div class="user-info">
+                <div>
+                <p><strong>Correo:</strong> <span id="user-email"></span></p>
+                <p><strong>Rol:</strong> <span id="user-role"></span></p>
+                <form action="/mi-cuenta" method="POST">
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Enviar Mensaje:</label>
+                        <textarea class="styled-textarea" rows="4" cols="50" placeholder="Escribe tu mensaje..." id="message" name="message" required></textarea>
+                    </div>
+                    <button type="submit" class="buttons">Enviar</button>
+                </form>
+                </div>
+                <div class="messages-container">
+                    <h2>Mensajes Enviados:</h2>
+                    <ul class="messages-list" id="messages-list">
+                </div>
+                    <!-- Los mensajes aparecen aquí -->
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('/api/mi-cuenta-data')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('user-email').textContent = data.email;
+                    document.getElementById('user-role').textContent = data.role;
+                    const messagesList = document.getElementById('messages-list');
+                    data.messages.forEach(msg => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${msg.content} - ${new Date(msg.timestamp).toLocaleString()}`;
+                        messagesList.appendChild(listItem);
+                    });
+                });
+        });
+    </script>
+<div class="footer-spacing"></div>
+<footer class="text-center mt-5">
+    <div class="container_footer">
+        <p class="mb-1">© 2024 C.A.C. Refrigeración. Todos los derechos reservados.</p>
+        <ul class="list-inline">
+            <li class="list-inline-item">
+                <a href="/" class="text-decoration-none">
+                    <i class="fas fa-home fa-2x footer-icon"></i> 
+                </a>
+            </li>
+            <li class="list-inline-item">
+                <a href="https://api.whatsapp.com/send?phone=56949864821" class="text-decoration-none" target="_blank">
+                    <i class="fab fa-whatsapp fa-2x footer-icon"></i> 
+                </a>
+            </li>
+            <li class="list-inline-item">
+                <a href="https://www.instagram.com/cacrefrigeracionspa/" class="text-decoration-none" target="_blank">
+                    <i class="fab fa-instagram fa-2x footer-icon"></i> 
+                </a>
+            </li>
+        </ul>
+    </div>
+</footer>
+</body>
+</html>
