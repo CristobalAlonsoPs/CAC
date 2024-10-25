@@ -10,7 +10,11 @@ const session = require('express-session');
 app.use(express.static('public'));
 
 // Conexion a mongo
-mongoose.connect('mongodb://127.0.0.1:27017/miBaseDeDatos')
+
+// mongoose.connect('mongodb+srv://crprez18:Jordanretro11@cluster0.uwq62.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0s')
+//     .then(() => console.log('Conectado a MongoDB'))
+//     .catch(err => console.error('Error al conectar a MongoDB:', err));
+mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('Conectado a MongoDB'))
     .catch(err => console.error('Error al conectar a MongoDB:', err));
 
