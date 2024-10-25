@@ -7,6 +7,8 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const session = require('express-session');
 
+require('dotenv').config();
+
 app.use(express.static('public'));
 
 // Conexion a mongo
