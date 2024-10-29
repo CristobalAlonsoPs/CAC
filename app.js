@@ -387,7 +387,7 @@ app.post('/new-password/:token', async (req, res) => {
     }
 
     user.password = await bcrypt.hash(password, 10);
-    user.verificationToken = ''; // Limpiar el token
+    user.verificationToken = '';
     await user.save();
 
     console.log("Contraseña restablecida con éxito.");
