@@ -32,6 +32,7 @@ const messageSchema = new mongoose.Schema({
     timestamp: { type: Date, default: Date.now }
 });
 
+
 const Message = mongoose.model('Message', messageSchema);
 
 app.use(bodyParser.json());
@@ -71,16 +72,27 @@ app.post('/login', async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-        return res.send('<h1>Error: Usuario no encontrado</h1>');
+        return res.send(`<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+            <div class="container mt-5 text-center">
+                <h1>Error: Usuario no encontrado</h1>
+            </div>`);
     }
 
     if (!user.verified) {
-        return res.send('<h1>Error: Verifica tu correo antes de iniciar sesión.</h1>');
+        return res.send(`<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+            <div class="container mt-5 text-center">
+                <h1>Error: Verifica tu correo antes de iniciar sesión.</h1>
+            </div>`);
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-        return res.send('<h1>Error: Contraseña incorrecta</h1>');
+        return res.send(`<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+            <div class="container mt-5 text-center">
+                <h1>Error: Contraseña incorrecta</h1>
+                <a href="/login" class="btn btn-primary">Volver</a>
+            </div>`);
+        
     }
 
     req.session.userId = user._id;
@@ -100,17 +112,29 @@ app.post('/register', async (req, res) => {
     const { email, password, confirmPassword } = req.body;
 
     if (password !== confirmPassword) {
-        return res.send('<h1>Error: Las contraseñas no coinciden.</h1>');
+        return res.send(`<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+            <div class="container mt-5 text-center">
+                <h1>Error: Las contraseñas no coinciden.</h1>
+                <a href="/register" class="btn btn-primary">Volver</a>
+            </div>`);
     }
 
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
     if (!passwordRegex.test(password)) {
-        return res.send('<h1>Error: La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número.</h1>');
+        return res.send(`<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+            <div class="container mt-5 text-center">
+                <h1>Error: La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número.</h1>
+                <a href="/register" class="btn btn-primary">Volver</a>
+            </div>`);
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-        return res.send('<h1>Error: El correo ya está registrado.</h1>');
+        return res.send(`<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+            <div class="container mt-5 text-center">
+                <h1>Error: El correo ya está registrado.</h1>
+                <a href="/register" class="btn btn-primary">Volver</a>
+            </div>`);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -151,6 +175,7 @@ app.post('/register', async (req, res) => {
         res.send('<h1>Error al registrar el usuario.</h1>');
     }
 });
+
 
 // Verificar correo
 app.get('/verify/:token', async (req, res) => {
