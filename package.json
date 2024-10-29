@@ -18,6 +18,7 @@
     "express-session": "^1.18.1",
     "hbs": "^4.2.0",
     "mongoose": "^8.7.2",
+    "mongose": "^0.0.2-security",
     "nodemailer": "^6.9.15"
   },
   "devDependencies": {

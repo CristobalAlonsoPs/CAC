@@ -24,12 +24,30 @@
                             <h3 class="form__ingresar">Registrate</h3>
                             <input class="controls" type="email" name="email" placeholder="Correo electrónico" id="email" required>
                             <input class="controls" type="password" name="password" placeholder="Contraseña" id="password" required>
+                            <div id="passwordTooltip" class="tooltip">La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número.</div>
+                            <input class="controls" type="password"  name="confirmPassword" id="confirmPassword" placeholder="Confirma tu contraseña" required>
                             <button href="/login" class="buttons" type="submit">Registrarse</button>
                             <p1>¿Ya tienes cuenta? <a class="form__contra" href="/login">Iniciar Sesion</a></p1>
                         </div>
                     </form>    
                 </section>
             </header>
+            <script>
+                const passwordInput = document.getElementById('password');
+        const passwordTooltip = document.getElementById('passwordTooltip');
+
+        passwordInput.addEventListener('focus', () => {
+            passwordTooltip.style.display = 'block';
+        });
+
+        passwordInput.addEventListener('input', () => {
+            passwordTooltip.style.display = 'none';
+        });
+
+        passwordInput.addEventListener('blur', () => {
+            passwordTooltip.style.display = 'none';
+                });
+            </script>
 </body>
 
 </html>

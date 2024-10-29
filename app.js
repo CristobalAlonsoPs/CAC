@@ -7,16 +7,11 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const session = require('express-session');
 
-require('dotenv').config();
-
 app.use(express.static('public'));
 
-// Conexion a mongo
-
-// mongoose.connect('mongodb+srv://crprez18:Jordanretro11@cluster0.uwq62.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0s')
-//     .then(() => console.log('Conectado a MongoDB'))
-//     .catch(err => console.error('Error al conectar a MongoDB:', err));
-mongoose.connect(process.env.MONGODB_URI)
+// Conexión a MongoDB
+require('dotenv').config();
+mongoose.connect('mongodb://localhost:27017/miBaseDeDatos')
     .then(() => console.log('Conectado a MongoDB'))
     .catch(err => console.error('Error al conectar a MongoDB:', err));
 
@@ -39,7 +34,6 @@ const messageSchema = new mongoose.Schema({
 
 const Message = mongoose.model('Message', messageSchema);
 
-// Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
@@ -66,7 +60,6 @@ app.get('/', (req, res) => {
 app.get('/trabajos', (req, res) => {
     res.sendFile(__dirname + '/views/trabajos.html');
 });
-
 
 // Ruta para el login
 app.get('/login', (req, res) => {
@@ -104,7 +97,16 @@ app.get('/register', (req, res) => {
 
 // Procesar el formulario de registro
 app.post('/register', async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, confirmPassword } = req.body;
+
+    if (password !== confirmPassword) {
+        return res.send('<h1>Error: Las contraseñas no coinciden.</h1>');
+    }
+
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!passwordRegex.test(password)) {
+        return res.send('<h1>Error: La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número.</h1>');
+    }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -113,7 +115,6 @@ app.post('/register', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const verificationToken = crypto.randomBytes(32).toString('hex'); 
-    console.log(`Token de verificación generado: ${verificationToken}`);
 
     const user = new User({
         email,
@@ -154,19 +155,16 @@ app.post('/register', async (req, res) => {
 // Verificar correo
 app.get('/verify/:token', async (req, res) => {
     const { token } = req.params;
-    console.log(`Token recibido en la URL: ${token}`);
 
     try {
         const user = await User.findOne({ verificationToken: token });
-        console.log(`Usuario encontrado: ${user}`);
 
         if (!user) {
             return res.send('<h1>Error: Token de verificación inválido.</h1>');
         }
 
-        // Actualizar el estado de verificación y eliminar el token
         user.verified = true;
-        user.verificationToken = '';  // Asignamos una cadena vacía en lugar de null o undefined
+        user.verificationToken = '';  
         await user.save();
         
         res.send(`<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -199,7 +197,6 @@ app.get('/mi-cuenta', isAuthenticated, async (req, res) => {
 
     const messages = await Message.find({ sender: user.email }).sort({ timestamp: -1 });
 
-    // Puedes pasar la información del usuario y los mensajes directamente a tu HTML
     res.sendFile(__dirname + '/views/miCuenta.html');
 });
 
@@ -215,36 +212,32 @@ app.get('/api/mi-cuenta-data', isAuthenticated, async (req, res) => {
     });
 });
 
-
-
 // Procesar el envío de mensajes
 app.post('/mi-cuenta', isAuthenticated, async (req, res) => {
     const { message } = req.body;
 
     const newMessage = new Message({
-        sender: req.session.email, // Correo del usuario que envía el mensaje
+        sender: req.session.email,
         content: message
     });
 
     try {
         await newMessage.save();
 
-        // Configurar el correo para el administrador
         const mailOptions = {
-            from: 'cr.prez18@gmail.com', // Correo del remitente (tu Gmail)
-            to: 'cr.prez18@gmail.com', // Correo del administrador
-            subject: `Nuevo mensaje de ${req.session.email}`, // Asunto del correo
-            text: `Has recibido un nuevo mensaje de ${req.session.email}:\n\n${message}` // Cuerpo del correo
+            from: 'cr.prez18@gmail.com',
+            to: 'cr.prez18@gmail.com',
+            subject: `Nuevo mensaje de ${req.session.email}`,
+            text: `Has recibido un nuevo mensaje de ${req.session.email}:\n\n${message}`
         };
 
-        // Enviar el correo
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
                 console.error('Error al enviar el correo al administrador:', error);
                 return res.send('<h1>Error al enviar el mensaje.</h1>');
             }
             console.log('Correo enviado al administrador:', info.response);
-            res.redirect('/mi-cuenta'); // Redirigir después de enviar
+            res.redirect('/mi-cuenta'); 
         });
 
     } catch (error) {
@@ -253,16 +246,161 @@ app.post('/mi-cuenta', isAuthenticated, async (req, res) => {
     }
 });
 
-
-
 // Cerrar sesión
 app.get('/logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/');
+    req.session.destroy(err => {
+        if (err) {
+            return console.error('Error al cerrar sesión:', err);
+        }
+        res.redirect('/');
+    });
 });
 
+// Ruta para solicitar restablecimiento de contraseña
+app.get('/forgot-password', (req, res) => {
+    console.log("Accediendo a la página de solicitud de restablecimiento de contraseña.");
+    res.sendFile(__dirname + '/views/forgotPassword.html');
+});
+
+// Procesar solicitud de restablecimiento de contraseña
+app.post('/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    console.log("Solicitud de restablecimiento de contraseña para el correo:", email);
+    
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        console.log("Error: Usuario no encontrado");
+        return res.send(`<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+        <h1 class="text-danger text-center">Error: Usuario no encontrado.</h1>`);
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    user.verificationToken = resetToken;
+    await user.save();
+    console.log("Token de restablecimiento generado:", resetToken);
+
+    const mailOptions = {
+        from: 'cr.prez18@gmail.com',
+        to: email,
+        subject: 'Restablecimiento de Contraseña',
+        text: `Haz clic en el siguiente enlace para restablecer tu contraseña: http://localhost:3000/reset/${resetToken}`
+    };
+    
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error('Error al enviar el correo de restablecimiento:', error);
+            return res.send(`<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+            <h1 class="text-danger text-center">Error al enviar el correo de restablecimiento.</h1>`);
+        }
+        console.log('Correo de restablecimiento enviado:', info.response);
+        res.send(`<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+        <div class="container mt-5 text-center">
+            <h1>Te hemos enviado un correo para restablecer tu contraseña.</h1>
+        </div>`);
+    });
+});
+
+// Ruta para restablecer la contraseña usando el token
+app.get('/reset/:token', async (req, res) => {
+    const { token } = req.params;
+    const user = await User.findOne({ verificationToken: token });
+
+    if (!user) {
+        return res.send('<h1>Error: Token inválido.</h1>');
+    }
+
+    // Enviar el archivo HTML para el formulario de nueva contraseña
+
+    const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Restablecer Contraseña</title>
+        <link rel="stylesheet" href="/css/normalize.css">
+        <link rel="stylesheet" href="/css/estilo.css">
+    </head>
+    <body>
+        <header class="hero">
+            <div class="container">
+                <section class="form__registro">
+                    <form action="/new-password/${token}" method="POST">
+                        <div class="form__container">
+                            <h3 class="form__ingresar">Restablecer Contraseña</h3>
+                            <input type="hidden" name="token" value="${token}"> <!-- Campo oculto para el token -->
+                            <input class="controls" type="password" name="password" placeholder="Nueva Contraseña" required>
+                            <input class="controls" type="password" name="confirmPassword" placeholder="Confirmar Nueva Contraseña" required>
+                            <button class="buttons" type="submit">Restablecer Contraseña</button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </header>
+    </body>
+    </html>
+    `;
+
+    res.send(html); // Envía el HTML generado directamente
+});
+
+
+// Procesar la nueva contraseña
+app.post('/new-password/:token', async (req, res) => {
+    const { token } = req.params;
+    const { password, confirmPassword } = req.body;
+
+    console.log("Procesando nueva contraseña para el token:", token);
+    //console.log("Contraseña nueva ingresada:", password);
+
+    if (password !== confirmPassword) {
+        console.log("Error: Las contraseñas no coinciden");
+        // Redirigir al usuario con un mensaje y un botón para volver
+        res.send(`
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+            <div class="container mt-5 text-center">
+                <h1>Error: Las contraseñas no coinciden.</h1>
+                <a href="/reset/${token}" class="btn btn-primary mt-3">Volver a intentar</a>
+            </div>
+        `);
+        return;
+    }
+
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!passwordRegex.test(password)) {
+        console.log("Error: La contraseña no cumple con los requisitos");
+        return res.send(`
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+            <div class="container mt-5 text-center">
+                <h1>Error: La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número..</h1>
+                <a href="/reset/${token}" class="btn btn-primary mt-3">Volver a intentar</a>
+            </div>
+        `);
+    }
+
+    const user = await User.findOne({ verificationToken: token });
+    if (!user) {
+        console.log("Error: Token inválido");
+        return res.send('<h1>Error: Token inválido.</h1>');
+    }
+
+    user.password = await bcrypt.hash(password, 10);
+    user.verificationToken = ''; // Limpiar el token
+    await user.save();
+
+    console.log("Contraseña restablecida con éxito.");
+    res.send(`<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+        <div class="container mt-5 text-center">
+            <h1>Contraseña restablecida con éxito. Ahora puedes iniciar sesión.</h1>
+            <a href="/login" class="btn btn-primary">Iniciar Sesión</a>
+        </div>`);
+
+});
+
+
 // Iniciar el servidor
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor escuchando en el puerto ${PORT}`);
+app.listen(3000, () => {
+    console.log('Servidor en ejecución en http://localhost:3000');
 });
