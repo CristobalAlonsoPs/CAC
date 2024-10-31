@@ -886,6 +886,45 @@ footer {
     }
 
     /* my projects */
+    .container {
+        width: 85%;
+    }
+    .hero {
+        height: 100vh;
+        background-image: var(--background), url('/images/1.jpeg');
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+        background-position: center;
+        position: relative;
+        overflow-y: scroll;
+    }
+    .hero__wave {
+        position: sticky;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100px;
+    }
+    .form__registro {
+        width: 90%;
+        margin-top: 100px;
+        padding: 20px 35px;
+        background: #f2f2f2;
+        box-shadow: 10px 13px 27px #000000;
+    }
+    .form__container {
+        width: 90%;
+    }
+    .controls {
+        width: 90%;
+    }
+    .styled-textarea {
+        width: 90%;
+    }
+    .messages-container {
+        width: 90%;
+    }
     .projects__grid {
         grid-template-areas:
             "img1"

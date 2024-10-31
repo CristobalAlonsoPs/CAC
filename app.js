@@ -32,7 +32,6 @@ const messageSchema = new mongoose.Schema({
     timestamp: { type: Date, default: Date.now }
 });
 
-
 const Message = mongoose.model('Message', messageSchema);
 
 app.use(bodyParser.json());
@@ -112,29 +111,35 @@ app.post('/register', async (req, res) => {
     const { email, password, confirmPassword } = req.body;
 
     if (password !== confirmPassword) {
-        return res.send(`<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+        return res.send(`
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
             <div class="container mt-5 text-center">
                 <h1>Error: Las contraseñas no coinciden.</h1>
                 <a href="/register" class="btn btn-primary">Volver</a>
-            </div>`);
+            </div>
+        `);
     }
 
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
     if (!passwordRegex.test(password)) {
-        return res.send(`<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+        return res.send(`
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
             <div class="container mt-5 text-center">
                 <h1>Error: La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número.</h1>
                 <a href="/register" class="btn btn-primary">Volver</a>
-            </div>`);
+            </div>
+        `);
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-        return res.send(`<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+        return res.send(`
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
             <div class="container mt-5 text-center">
                 <h1>Error: El correo ya está registrado.</h1>
                 <a href="/register" class="btn btn-primary">Volver</a>
-            </div>`);
+            </div>
+        `);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -164,18 +169,19 @@ app.post('/register', async (req, res) => {
             console.log('Correo de verificación enviado:', info.response);
         });
 
-        res.send(`<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-        <div class="container mt-5 text-center">
-            <h1>Gracias por registrarte, ${email}!</h1>
-            <p>Revisa tu correo para verificar tu cuenta.</p>
-        </div>`);
+        res.send(`
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+            <div class="container mt-5 text-center">
+                <h1>Gracias por registrarte, ${email}!</h1>
+                <p>Revisa tu correo para verificar tu cuenta.</p>
+            </div>
+        `);
 
     } catch (error) {
         console.error('Error al registrar el usuario:', error);
         res.send('<h1>Error al registrar el usuario.</h1>');
     }
 });
-
 
 // Verificar correo
 app.get('/verify/:token', async (req, res) => {
@@ -211,6 +217,53 @@ function isAuthenticated(req, res, next) {
     }
     res.redirect('/login');
 }
+// Middleware para proteger rutas
+function isAdmin(req, res, next) {
+    if (req.session && req.session.user && req.session.user.role === 'admin') {
+        // El usuario está autenticado y es administrador
+        return next();
+    } else {
+        // Acceso denegado
+        return res.status(403).send('Acceso denegado');
+    }
+}
+
+// Ruta de administración usando el middleware `isAdmin`
+app.get('/admin', isAdmin, (req, res) => {
+    res.sendFile(__dirname + '/views/admin.html');
+});
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    // Busca al usuario en la base de datos
+    const user = await User.findOne({ email });
+
+    if (user && (await bcrypt.compare(password, user.password))) {
+        // Usuario autenticado, guardar en la sesión
+        req.session.user = user; // Guarda toda la información del usuario, incluyendo `role`
+        res.redirect('/admin'); // Redirige al área de administración si es admin
+    } else {
+        res.status(401).send('Credenciales inválidas');
+    }
+});
+
+
+// Rutas de API para mensajes y usuarios
+app.get('/api/mensajes', (req, res) => {
+    // Obtener mensajes de la base de datos
+    Mensaje.find()
+        .then(mensajes => res.json(mensajes))
+        .catch(err => res.status(500).json({ error: 'Error al obtener mensajes' }));
+});
+
+app.get('/api/usuarios', (req, res) => {
+    // Obtener usuarios de la base de datos
+    Usuario.find()
+        .then(usuarios => res.json(usuarios))
+        .catch(err => res.status(500).json({ error: 'Error al obtener usuarios' }));
+});
+
+
 
 // Ruta para "Mi Cuenta"
 app.get('/mi-cuenta', isAuthenticated, async (req, res) => {
