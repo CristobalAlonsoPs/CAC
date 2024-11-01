@@ -90,7 +90,7 @@ ul.list-inline li {
 
 .hero3 {
     height: 100vh;
-    background-image: var(--background), url('../assets/7.jpeg');
+    background-image: var(--background), url('/images/7.jpeg');
     background-repeat: no-repeat;
     background-size: cover;
     background-attachment: fixed;
@@ -99,7 +99,7 @@ ul.list-inline li {
 }
 .hero4 {
     height: 500px;
-    background-image: var(--background), url('../assets/9.jpeg');
+    background-image: var(--background), url('/images/9.jpeg');
     background-repeat: no-repeat;
     background-size: cover;
     background-attachment: fixed;

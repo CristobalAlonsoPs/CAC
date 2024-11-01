@@ -1,27 +1,106 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Administración - Gestión de Mensajes y Usuarios</title>
-    <link rel="stylesheet" href="/css/admin.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administrador</title>
+    <link rel="shortcut icon" href="/images/logfav.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1>Panel de Administración</h1>
-
-    <section id="mensajes">
-        <h2>Gestión de Mensajes</h2>
-        <div id="lista-mensajes">
-            <!-- Aquí se mostrarán los mensajes -->
+    <div class="container mt-5">
+        <h1 class="text-center">Panel de Administrador</h1>
+        
+        <div class="mt-5">
+            <h2>Usuarios</h2>
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Email</th>
+                        <th>Rol</th>
+                    </tr>
+                </thead>
+                <tbody id="usuariosTableBody"></tbody>
+            </table>
         </div>
-    </section>
 
-    <section id="usuarios">
-        <h2>Gestión de Usuarios</h2>
-        <div id="lista-usuarios">
-            <!-- Aquí se mostrarán los usuarios -->
+        <div class="mt-5">
+            <h2>Mensajes</h2>
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Remitente</th>
+                        <th>Mensaje</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="mensajesTableBody"></tbody>
+            </table>
         </div>
-    </section>
+    </div>
 
-    <script src="/js/admin.js"></script>
+    <script>
+        // Obtener y mostrar los usuarios
+        fetch('/api/usuarios')
+            .then(response => response.json())
+            .then(usuarios => {
+                const usuariosTableBody = document.getElementById('usuariosTableBody');
+                usuarios.forEach(usuario => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${usuario.email}</td>
+                        <td>${usuario.role}</td>
+                    `;
+                    usuariosTableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error al cargar los usuarios:', error));
+
+        // Obtener y mostrar los mensajes
+        fetch('/api/mensajes')
+            .then(response => response.json())
+            .then(mensajes => {
+                const mensajesTableBody = document.getElementById('mensajesTableBody');
+                mensajes.forEach(mensaje => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${mensaje.sender}</td>
+                        <td>${mensaje.content}</td>
+                        <td>${new Date(mensaje.timestamp).toLocaleString()}</td>
+                        <td>
+                            <button class="btn btn-primary" onclick="responderMensaje('${mensaje._id}')">Responder</button>
+                        </td>
+                    `;
+                    mensajesTableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error al cargar los mensajes:', error));
+
+        // Función para responder mensajes
+        function responderMensaje(id) {
+            const mensaje = prompt("Escribe tu respuesta:");
+
+            if (mensaje) {
+                fetch(`/api/responder/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: mensaje })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert("Respuesta enviada correctamente.");
+                        // Podrías actualizar la lista de mensajes aquí si es necesario
+                    } else {
+                        alert("Error al enviar la respuesta.");
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+    </script>
+    
 </body>
 </html>

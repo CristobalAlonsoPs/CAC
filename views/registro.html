@@ -23,10 +23,10 @@
                     <form action="/register" method="POST">
                         <div class="form__container">
                             <h3 class="form__ingresar">Registrate</h3>
-                            <input class="controls" type="email" name="email" placeholder="Correo electrónico" id="email" required>
-                            <input class="controls" type="password" name="password" placeholder="Contraseña" id="password" required>
+                            <input class="controls" type="email" name="email" placeholder="Correo electrónico" id="email" required autocomplete="username">
+                            <input class="controls" type="password" name="password" placeholder="Contraseña" id="password" required autocomplete="new-password">
                             <div id="passwordTooltip" class="tooltip">La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número.</div>
-                            <input class="controls" type="password"  name="confirmPassword" id="confirmPassword" placeholder="Confirma tu contraseña" required>
+                            <input class="controls" type="password"  name="confirmPassword" id="confirmPassword" placeholder="Confirma tu contraseña" required autocomplete="new-password">
                             <button href="/login" class="buttons" type="submit">Registrarse</button>
                             <p1>¿Ya tienes cuenta? <a class="form__contra" href="/login">Iniciar Sesion</a></p1>
                         </div>

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device=width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="/images/logfav.png">
     <title>Login</title>
     <link rel="stylesheet" href="/css/normalice.css">
@@ -22,8 +22,8 @@
                 <form action="/login" method="post">
                     <div class="form__container">
                          <h3 class="form__ingresar">Iniciar Sesión</h3>
-                         <input class="controls" type="email" name="email" placeholder="Correo electrónico" id="email" required>
-                         <input class="controls" type="password" name="password" placeholder="Contraseña" id="password" required>
+                         <input class="controls" type="email" name="email" placeholder="Correo electrónico" id="email" required autocomplete="email">
+                         <input class="controls" type="password" name="password" placeholder="Contraseña" id="password" required autocomplete="current-password">
                          <button href="/mi-cuenta" class="buttons" type="submit">Ingresar</button>
                          <p1>¿Aun no tienes cuenta?<a class="form__contra" href="/register">Registrate</a></p1>
                          <p><a href="/forgot-password" class="form__contra">¿Olvidaste tu contraseña?</a></p>
