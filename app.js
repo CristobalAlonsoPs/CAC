@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const path = require('path');
 
 //Carga variables de entorno desde .env
@@ -50,6 +51,10 @@ app.use(session({
     secret: 'mi_secreto',
     resave: false,
     saveUninitialized: true,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI || process.env.DATABASE_URL,
+        ttl: 14 * 24 * 60 * 60 // Sesiones expirarán en 14 días
+    })
 }));
 
 
