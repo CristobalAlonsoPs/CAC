@@ -187,15 +187,13 @@ app.post('/register', async (req, res) => {
     try {
         await user.save();
 
-        await enviarCorreo(email, `Verifica tu cuenta haciendo clic en el siguiente enlace: ${process.env.SERVER_URL}/verify/${verificationToken}`);
-
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: email,
             subject: 'Verificación de Correo',
-            text: `Verifica tu cuenta haciendo clic en el siguiente enlace: ${process.env.SERVER_URL}/${verificationToken}`
+            text: `Verifica tu cuenta haciendo clic en el siguiente enlace: ${process.env.SERVER_URL}/verify/${verificationToken}`
         };
-
+        
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
                 return console.error('Error al enviar el correo de verificación:', error);
