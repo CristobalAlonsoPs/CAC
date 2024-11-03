@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const session = require('express-session');
@@ -21,11 +21,7 @@ const adminRoutes = require('./public/js/adminController');
 
 console.log("MongoDB URI:", process.env.DATABASE_URL || process.env.MONGODB_URI);
 // Conexión a MongoDB
-mongoose.connect(process.env.DATABASE_URL || process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-
-})
+mongoose.connect(process.env.DATABASE_URL || process.env.MONGODB_URI)
     .then(() => console.log('Conectado a MongoDB'))
     .catch(err => console.error('Error al conectar a MongoDB:', err));
 
@@ -115,7 +111,7 @@ app.post('/login', async (req, res) => {
             </div>`);
     }
 
-    const validPassword = await bcryptjs.compare(password, user.password);
+    const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
         return res.send(`<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
             <div class="container mt-5 text-center">
@@ -173,7 +169,7 @@ app.post('/register', async (req, res) => {
         `);
     }
 
-    const hashedPassword = await bcryptjs.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     const verificationToken = crypto.randomBytes(32).toString('hex'); 
 
     const user = new User({
@@ -268,7 +264,7 @@ app.post('/login', async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
 
-    if (user && (await bcryptjs.compare(password, user.password))) {
+    if (user && (await bcrypt.compare(password, user.password))) {
         req.session.userId = user._id;
         req.session.email = user.email;
         req.session.role = user.role;
@@ -577,7 +573,7 @@ app.post('/new-password/:token', async (req, res) => {
         return res.send('<h1>Error: Token inválido.</h1>');
     }
 
-    user.password = await bcryptjs.hash(password, 10);
+    user.password = await bcrypt.hash(password, 10);
     user.verificationToken = '';
     await user.save();
 
