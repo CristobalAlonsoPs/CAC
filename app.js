@@ -16,10 +16,10 @@ app.use(express.static('public'));
 
 const adminRoutes = require('./public/js/adminController');
 
-console.log("MongoDB URI:", process.env.DATABASE_URL,);
+console.log("MongoDB URI:", process.env.DATABASE_URL);
 // Conexión a MongoDB
 require('dotenv').config();
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.DATABASE_URL)
     .then(() => console.log('Conectado a MongoDB'))
     .catch(err => console.error('Error al conectar a MongoDB:', err));
 
