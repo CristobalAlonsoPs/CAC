@@ -852,6 +852,10 @@ footer {
     :root {
         --boton-padding: 18px 35px;
     }
+    body {
+        -webkit-transform: translate3d(0, 0, 0);
+    }
+    
 
     .subtitle {
         font-size: 2rem;
