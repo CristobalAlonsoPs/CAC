@@ -60,7 +60,6 @@ const transporter = nodemailer.createTransport({
     }
 });
 // Funcion para enviar correo
-//console.log(`Enviando correo a: ${sender} con el mensaje: ${content}`);
 async function enviarCorreo(destinatario, mensaje) {
     const mailOptions = {
         from: process.env.EMAIL_USER,
