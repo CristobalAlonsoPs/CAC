@@ -187,13 +187,13 @@ app.post('/register', async (req, res) => {
     try {
         await user.save();
 
-        await enviarCorreo(email, `Verifica tu cuenta haciendo clic en el siguiente enlace: http://localhost:3000/verify/${verificationToken}`);
+        await enviarCorreo(email, `Verifica tu cuenta haciendo clic en el siguiente enlace: ${process.env.SERVER_URL}/verify/${verificationToken}`);
 
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: email,
             subject: 'Verificación de Correo',
-            text: `Verifica tu cuenta haciendo clic en el siguiente enlace: http://localhost:3000/verify/${verificationToken}`
+            text: `Verifica tu cuenta haciendo clic en el siguiente enlace: ${process.env.SERVER_URL}/${verificationToken}`
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
@@ -479,7 +479,7 @@ app.post('/forgot-password', async (req, res) => {
         from: 'cr.prez18@gmail.com',
         to: email,
         subject: 'Restablecimiento de Contraseña',
-        text: `Haz clic en el siguiente enlace para restablecer tu contraseña: http://localhost:3000/reset/${resetToken}`
+        text: `Haz clic en el siguiente enlace para restablecer tu contraseña: ${process.env.SERVER_URL}/reset/${resetToken}`
     };
     
 
