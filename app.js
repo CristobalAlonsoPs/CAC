@@ -16,7 +16,7 @@ app.use(express.static('public'));
 
 const adminRoutes = require('./public/js/adminController');
 
-
+console.log("MongoDB URI:", process.env.MONGODB_URI);
 // Conexión a MongoDB
 require('dotenv').config();
 mongoose.connect(process.env.MONGODB_URI)
