@@ -7,6 +7,9 @@ const crypto = require('crypto');
 const session = require('express-session');
 const path = require('path');
 
+//Carga variables de entorno desde .env
+require('dotenv').config();
+
 //Importacion de modelos
 const Mensaje = require('./public/js/mensaje');
 const Usuario = require('./public/js/usuario');
@@ -16,10 +19,13 @@ app.use(express.static('public'));
 
 const adminRoutes = require('./public/js/adminController');
 
-console.log("MongoDB URI:", process.env.DATABASE_URL);
+console.log("MongoDB URI:", process.env.DATABASE_URL || process.env.MONGODB_URI);
 // Conexión a MongoDB
-require('dotenv').config();
-mongoose.connect(process.env.DATABASE_URL)
+mongoose.connect(process.env.DATABASE_URL || process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+
+})
     .then(() => console.log('Conectado a MongoDB'))
     .catch(err => console.error('Error al conectar a MongoDB:', err));
 
